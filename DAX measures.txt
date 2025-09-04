@@ -1,0 +1,57 @@
+balance-annually:
+Cash & Equivalents (Annual) = SUM('balance_annually'[cash])
+Debt to Equity Ratio (Annual) = DIVIDE([Total Debt (Annual)], [Shareholder Equity(Annual)],0)
+Shareholder Equity(Annual) = SUM('balance_annually'[totalStockholderEquity])
+Retained Earnings (Annual) = SUM('balance_annually'[retainedEarnings])
+Total Debt (Annual) = SUM('balance_annually'[longTermDebt])
+Total Assets(Annual) = SUM(balance_annually[totalAssets])
+Total Liabilities(Annual) = SUM('balance_annually'[totalLiab])
+
+balancy-quaterly:
+Cash & Equivalents (Quarterly) = SUM('balance_quarterly'[cash])
+Debt to Equity Ratio (Quarterly) = DIVIDE([Total Debt (Quarterly)], [Shareholder Equity (Quarterly)], 0)
+Retained Earnings (Quarterly) = SUM('balance_quarterly'[retainedEarnings])
+Shareholder Equity (Quarterly) = SUM('balance_quarterly'[totalStockholderEquity])
+Total Assets (Quarterly) = SUM('balance_quarterly'[totalAssets])
+Total Debt (Quarterly) = SUM('balance_quarterly'[longTermDebt])
+Total Liabilities (Quarterly) = SUM('balance_quarterly'[totalLiab])
+
+
+cashflow annually:
+CapEx (Annual) = SUM('cashflow_annually'[capitalExpenditures])
+Cash From Financing (Annual) = SUM('cashflow_annually'[totalCashFromFinancingActivities])
+Cash From Investing (Annual) = SUM('cashflow_annually'[totalCashflowsFromInvestingActivities])
+Cash From Operations (Annual) = SUM('cashflow_annually'[totalCashFromOperatingActivities])
+Free Cash Flow (Annual) = [Cash From Operations (Annual)] - [CapEx (Annual)]
+
+Company table:
+Cash YoY Change = [Cash & Equivalents (Annual)] - CALCULATE([Cash & Equivalents (Annual)], SAMEPERIODLASTYEAR('Date'[Date]))
+
+Consistent Cash Growth = 
+VAR MinYoY =
+    MINX(
+        VALUES('Date'[Year]),
+        [Cash YoY Change]
+    )
+RETURN
+IF(MinYoY > 0, "Yes", "No")
+
+
+Negative FCF Flag = IF([Free Cash Flow (Annual)] < 0, 1, 0)
+Rank by CFO = RANKX(ALLSELECTED(Company[stock]), [Cash From Operations (Annual)], , DESC, DENSE)
+Rank by Revenue = RANKX(ALLSELECTED(Company[stock]), [Total Revenue (Annual)], , DESC, DENSE)
+
+Date table:
+Assets LY = CALCULATE([Total Assets(Annual)], SAMEPERIODLASTYEAR('Date'[Date]))
+Assets YoY % = DIVIDE([Total Assets(Annual)] - [Assets LY], [Assets LY], 0)
+Net Income LY = CALCULATE([Net Income (Annual)], SAMEPERIODLASTYEAR('Date'[Date]))
+Net Income YoY % = DIVIDE([Net Income (Annual)] - [Net Income LY], [Net Income LY], 0)
+Revenue LY = CALCULATE([Total Revenue (Annual)], SAMEPERIODLASTYEAR('Date'[Date]))
+Revenue YoY % = DIVIDE([Total Revenue (Annual)] - [Revenue LY], [Revenue LY], 0)
+
+
+income annually:
+Gross Profit (Annual) = SUM('income_annually'[grossProfit])
+Gross Profit Margin (Annual) = DIVIDE([Gross Profit (Annual)], [Total Revenue (Annual)],0)
+Has Loss (Annual) = IF([Net Income (Annual)] < 0, 1, 0)
+
